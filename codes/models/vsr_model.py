@@ -20,8 +20,8 @@ class VSRModel(BaseModel):
         super(VSRModel, self).__init__(opt)
 
         if self.verbose:
-            self.logger.info('{} Model Info {}'.format('=' * 20, '=' * 20))
-            self.logger.info('Model: {}'.format(opt['model']['name']))
+            self.logger.info(f"{'=' * 20} Model Info {'=' * 20}")
+            self.logger.info(f"Model: {opt['model']['name']}")
 
         # set network
         self.set_network()
@@ -34,15 +34,16 @@ class VSRModel(BaseModel):
         # define net G
         self.net_G = define_generator(self.opt).to(self.device)
         if self.verbose:
-            self.logger.info('Generator: {}\n'.format(
-                self.opt['model']['generator']['name']) + self.net_G.__str__())
+            self.logger.info(
+                f"Generator: {self.opt['model']['generator']['name']}\n{self.net_G.__str__()}"
+            )
 
         # load network
         load_path_G = self.opt['model']['generator'].get('load_path')
         if load_path_G is not None:
             self.load_network(self.net_G, load_path_G)
             if self.verbose:
-                self.logger.info('Load generator from: {}'.format(load_path_G))
+                self.logger.info(f'Load generator from: {load_path_G}')
 
     def config_training(self):
         # set criterion

@@ -20,15 +20,13 @@ def datetime_str():
     return '%04d-%02d-%02d-%02d-%02d-%02d'%(now.year,now.month,now.day,now.hour,now.minute,now.second)
 
 def read_text_file(in_path):
-    fid = open(in_path,'r')
-
-    vals = []
-    cur_line = fid.readline()
-    while(cur_line!=''):
-        vals.append(float(cur_line))
+    with open(in_path,'r') as fid:
+        vals = []
         cur_line = fid.readline()
+        while(cur_line!=''):
+            vals.append(float(cur_line))
+            cur_line = fid.readline()
 
-    fid.close()
     return np.array(vals)
 
 def bootstrap(in_vec,num_samples=100,bootfunc=np.mean):
@@ -163,12 +161,12 @@ def grab_patch(img_in, P, yy, xx):
     return img_in[yy:yy+P,xx:xx+P,:]
 
 def load_image(path):
-    if(path[-3:] == 'dng'):
+    if (path[-3:] == 'dng'):
         import rawpy
         with rawpy.imread(path) as raw:
             img = raw.postprocess()
         # img = plt.imread(path)
-    elif(path[-3:]=='bmp' or path[-3:]=='jpg' or path[-3:]=='png'):
+    elif path[-3:] in ['bmp', 'jpg', 'png']:
         import cv2
         return cv2.imread(path)[:,:,::-1]
     else:
@@ -215,17 +213,22 @@ def info(object, spacing=10, collapse=1):
                 e),
             collections.Callable)]
     processFunc = collapse and (lambda s: " ".join(s.split())) or (lambda s: s)
-    print("\n".join(["%s %s" %
-                     (method.ljust(spacing),
-                      processFunc(str(getattr(object, method).__doc__)))
-                     for method in methodList]))
+    print(
+        "\n".join(
+            [
+                f"{method.ljust(spacing)} {processFunc(str(getattr(object, method).__doc__))}"
+                for method in methodList
+            ]
+        )
+    )
 
 
 def varname(p):
     for line in inspect.getframeinfo(inspect.currentframe().f_back)[3]:
-        m = re.search(r'\bvarname\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)', line)
-        if m:
-            return m.group(1)
+        if m := re.search(
+            r'\bvarname\s*\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)', line
+        ):
+            return m[1]
 
 
 def print_numpy(x, val=True, shp=False):
@@ -319,8 +322,8 @@ def montage(
         [grid_nn, grid_mm] = np.meshgrid(
             np.arange(NN, dtype='uint'), np.arange(MM, dtype='uint'))
 
-    grid_mm = np.uint(grid_mm.flatten()[0:N])
-    grid_nn = np.uint(grid_nn.flatten()[0:N])
+    grid_mm = np.uint(grid_mm.flatten()[:N])
+    grid_nn = np.uint(grid_nn.flatten()[:N])
 
     EXTRA_PADY = EXTRA_PAD[0] * PADY
     EXTRA_PADX = EXTRA_PAD[0] * PADX
@@ -380,43 +383,32 @@ def flatten_nested_list(nested_list):
     # only works for list of list
     accum = []
     for sublist in nested_list:
-        for item in sublist:
-            accum.append(item)
+        accum.extend(iter(sublist))
     return accum
 
 def read_file(in_path,list_lines=False):
     agg_str = ''
-    f = open(in_path,'r')
-    cur_line = f.readline()
-    while(cur_line!=''):
-        agg_str+=cur_line
+    with open(in_path,'r') as f:
         cur_line = f.readline()
-    f.close()
-    if(list_lines==False):
+        while(cur_line!=''):
+            agg_str+=cur_line
+            cur_line = f.readline()
+    if (list_lines==False):
         return agg_str.replace('\n','')
-    else:
-        line_list = agg_str.split('\n')
-        ret_list = []
-        for item in line_list:
-            if(item!=''):
-                ret_list.append(item)
-        return ret_list
+    line_list = agg_str.split('\n')
+    return [item for item in line_list if (item!='')]
 
 def read_csv_file_as_text(in_path):
     agg_str = []
-    f = open(in_path,'r')
-    cur_line = f.readline()
-    while(cur_line!=''):
-        agg_str.append(cur_line)
+    with open(in_path,'r') as f:
         cur_line = f.readline()
-    f.close()
+        while(cur_line!=''):
+            agg_str.append(cur_line)
+            cur_line = f.readline()
     return agg_str
 
 def random_swap(obj0,obj1):
-    if(np.random.rand() < .5):
-        return (obj0,obj1,0)
-    else:
-        return (obj1,obj0,1)
+    return (obj0, obj1, 0) if (np.random.rand() < .5) else (obj1, obj0, 1)
 
 def voc_ap(rec, prec, use_07_metric=False):
     """ ap = voc_ap(rec, prec, [use_07_metric])
@@ -428,10 +420,7 @@ def voc_ap(rec, prec, use_07_metric=False):
         # 11 point metric
         ap = 0.
         for t in np.arange(0., 1.1, 0.1):
-            if np.sum(rec >= t) == 0:
-                p = 0
-            else:
-                p = np.max(prec[rec >= t])
+            p = 0 if np.sum(rec >= t) == 0 else np.max(prec[rec >= t])
             ap = ap + p / 11.
     else:
         # correct AP calculation

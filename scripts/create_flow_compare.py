@@ -29,19 +29,23 @@ imgs_without_mc = []
 imgs_with_mc = []
 
 for f in frm_num:
-    img_org_path = os.path.join(GT_root_path, dataset, 'GT', name, '000{}.png'.format(f))
+    img_org_path = os.path.join(GT_root_path, dataset, 'GT', name, f'000{f}.png')
     img_org = Image.open(img_org_path)
     imgs_org.append(img_org)
 
 imgs_hr = imgs_org[1:]
 
 for f in frm_num[1:]:
-    img_flow_path = os.path.join('../results/TestFlow/TecoGAN_BD_Flow', name, '000{}.png'.format(f))
+    img_flow_path = os.path.join(
+        '../results/TestFlow/TecoGAN_BD_Flow', name, f'000{f}.png'
+    )
     img_flow = Image.open(img_flow_path)
     imgs_flow.append(img_flow)
 
 for f in frm_num[1:]:
-    img_warp_path = os.path.join('../results/TestFlow/TecoGAN_BD_Warp', name, '000{}.png'.format(f))
+    img_warp_path = os.path.join(
+        '../results/TestFlow/TecoGAN_BD_Warp', name, f'000{f}.png'
+    )
     img_warp = Image.open(img_warp_path)
     imgs_warp.append(img_warp)
 
@@ -69,6 +73,6 @@ for r in range(row):
         dest_im.paste(img_resi, pos)  # paste to dest_im
 
 
-dest_im_path = os.path.join(rst_path, 'seq_flow_{}.png'.format(name))
+dest_im_path = os.path.join(rst_path, f'seq_flow_{name}.png')
 dest_im.save(dest_im_path, 'png')
 dest_im.show()  # finish

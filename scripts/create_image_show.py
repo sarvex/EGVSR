@@ -19,12 +19,12 @@ rst_path = '../results/show'
 dest_im = Image.new('RGBA', (col * (nw+pad) -pad, row * (nh+pad) -pad), (255, 255, 255))    # the image size of splicing image, background color is white
 
 for i in range(seq):
-    for n, file in enumerate(file_ls):      # loop place the sub image
-        img_path = os.path.join(father_path, file, 'im{}.png'.format(i+1))
+    for n, file in enumerate(file_ls):  # loop place the sub image
+        img_path = os.path.join(father_path, file, f'im{i + 1}.png')
         src_im = Image.open(img_path)  # open files in order
         resize_im = src_im.resize(size=(nw, nh))
         dest_im.paste(resize_im, (n%9 * (nw+pad), n//9 * (nh+pad)))  # paste to dest_im
-    dest_im_path = os.path.join(rst_path, 'splicing_{}.png'.format(i+1))
+    dest_im_path = os.path.join(rst_path, f'splicing_{i + 1}.png')
     dest_im.save(dest_im_path, 'png')
 
 
@@ -47,7 +47,7 @@ dest_im.show()  # finish
 # create gif
 frames = []
 for i in range(seq):
-    frm_name = os.path.join(rst_path, 'splicing_{}.png'.format(i + 1))
+    frm_name = os.path.join(rst_path, f'splicing_{i + 1}.png')
     frm_im = imageio.imread(frm_name)  # open files in order
     frames.append(frm_im)
 # Save them as frames into a gif

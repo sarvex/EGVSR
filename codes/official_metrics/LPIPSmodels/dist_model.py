@@ -57,19 +57,25 @@ class DistModel(BaseModel):
         self.spatial_order = spatial_order
         self.spatial_factor = spatial_factor
 
-        self.model_name = '%s [%s]'%(model,net)
-        if(self.model == 'net-lin'): # pretrained net + linear layer
+        self.model_name = f'{model} [{net}]'
+        if (self.model == 'net-lin'): # pretrained net + linear layer
             self.net = networks.PNetLin(use_gpu=use_gpu,pnet_rand=pnet_rand, pnet_tune=pnet_tune, pnet_type=net,use_dropout=True,spatial=spatial,version=version)
             kw = {}
             if not use_gpu:
                 kw['map_location'] = 'cpu'
-            if(model_path is None):
+            if (model_path is None):
                 import inspect
                 # model_path = './PerceptualSimilarity/weights/v%s/%s.pth'%(version,net)
-                model_path = os.path.abspath(os.path.join(inspect.getfile(self.initialize), '..', 'v%s/%s.pth'%(version,net)))
+                model_path = os.path.abspath(
+                    os.path.join(
+                        inspect.getfile(self.initialize),
+                        '..',
+                        f'v{version}/{net}.pth',
+                    )
+                )
 
-            if(not is_train):
-                print('Loading model from: %s'%model_path)
+            if (not is_train):
+                print(f'Loading model from: {model_path}')
                 self.net.load_state_dict(torch.load(model_path, **kw))
 
         elif(self.model=='net'): # pretrained network
@@ -83,7 +89,7 @@ class DistModel(BaseModel):
             self.net = networks.DSSIM(use_gpu=use_gpu,colorspace=colorspace)
             self.model_name = 'SSIM'
         else:
-            raise ValueError("Model [%s] not recognized." % self.model)
+            raise ValueError(f"Model [{self.model}] not recognized.")
 
         self.parameters = list(self.net.parameters())
 
@@ -146,13 +152,16 @@ class DistModel(BaseModel):
             L = [convert_output(x) for x in self.d0]
             spatial_shape = self.spatial_shape
             if spatial_shape is None:
-                if(self.spatial_factor is None):
+                if (self.spatial_factor is None):
                     spatial_shape = (in0.size()[2],in0.size()[3])
                 else:
-                    spatial_shape = (max([x.shape[0] for x in L])*self.spatial_factor, max([x.shape[1] for x in L])*self.spatial_factor)
-            
+                    spatial_shape = (
+                        max(x.shape[0] for x in L) * self.spatial_factor,
+                        max(x.shape[1] for x in L) * self.spatial_factor,
+                    )
+
             L = [skimage.transform.resize(x, spatial_shape, order=self.spatial_order, mode='edge') for x in L]
-            
+
             L = np.mean(np.concatenate(L, 2) * len(L), 2)
             return L
         else:
@@ -271,12 +280,10 @@ def score_2afc_dataset(data_loader,func):
     gts = []
 
     # bar = pb.ProgressBar(max_value=data_loader.load_data().__len__())
-    for (i,data) in enumerate(data_loader.load_data()):
+    for data in data_loader.load_data():
         d0s+=func(data['ref'],data['p0']).tolist()
         d1s+=func(data['ref'],data['p1']).tolist()
         gts+=data['judge'].cpu().numpy().flatten().tolist()
-        # bar.update(i)
-
     d0s = np.array(d0s)
     d1s = np.array(d1s)
     gts = np.array(gts)
@@ -303,11 +310,9 @@ def score_jnd_dataset(data_loader,func):
     gts = []
 
     # bar = pb.ProgressBar(max_value=data_loader.load_data().__len__())
-    for (i,data) in enumerate(data_loader.load_data()):
+    for data in data_loader.load_data():
         ds+=func(data['p0'],data['p1']).tolist()
         gts+=data['same'].cpu().numpy().flatten().tolist()
-        # bar.update(i)
-
     sames = np.array(gts)
     ds = np.array(ds)
 

@@ -96,14 +96,12 @@ class UnpairedLMDBDataset(BaseDataset):
 
         h, w = frms.shape[-2:]
         assert (csz <= h) and (csz <= w), \
-            'the crop size is larger than the image size'
+                'the crop size is larger than the image size'
 
         # crop
         top = random.randint(0, h - csz)
         left = random.randint(0, w - csz)
-        pats = frms[..., top: top + csz, left: left + csz]
-
-        return pats
+        return frms[..., top: top + csz, left: left + csz]
 
     @staticmethod
     def augment_sequence(pats):

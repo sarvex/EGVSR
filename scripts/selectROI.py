@@ -16,7 +16,9 @@ dataset = 'Vid4'
 name = 'walk'
 frm_num = 18
 # bridge face room
-gt_img_path = os.path.join(GT_root_path, dataset, 'GT', name, '00{}.png'.format(frm_num))
+gt_img_path = os.path.join(
+    GT_root_path, dataset, 'GT', name, f'00{frm_num}.png'
+)
 
 img = cv2.imread(gt_img_path)
 

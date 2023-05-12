@@ -13,8 +13,7 @@ class VanillaGANLoss(nn.Module):
             :param status: boolean, True/False
         """
         target = torch.empty_like(input).fill_(int(status))
-        loss = self.crit(input, target)
-        return loss
+        return self.crit(input, target)
 
 
 class LSGANLoss(nn.Module):
@@ -27,8 +26,7 @@ class LSGANLoss(nn.Module):
             :param status: boolean, True/False
         """
         target = torch.empty_like(input).fill_(int(status))
-        loss = self.crit(input, target)
-        return loss
+        return self.crit(input, target)
 
 
 class CharbonnierLoss(nn.Module):
@@ -60,6 +58,4 @@ class CosineSimilarityLoss(nn.Module):
 
     def forward(self, input, target):
         diff = F.cosine_similarity(input, target, dim=1, eps=self.eps)
-        loss = 1.0 - diff.mean()
-
-        return loss
+        return 1.0 - diff.mean()

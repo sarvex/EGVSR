@@ -30,8 +30,7 @@ def define_criterion(criterion_opt):
         criterion = LSGANLoss(reduction=criterion_opt['reduction'])
 
     else:
-        raise ValueError('Unrecognized criterion: {}'.format(
-            criterion_opt['type']))
+        raise ValueError(f"Unrecognized criterion: {criterion_opt['type']}")
 
     return criterion
 
@@ -61,7 +60,6 @@ def define_lr_schedule(schedule_opt, optimizer):
         )
 
     else:
-        raise ValueError('Unrecognized lr schedule: {}'.format(
-            schedule_opt['type']))
+        raise ValueError(f"Unrecognized lr schedule: {schedule_opt['type']}")
 
     return schedule

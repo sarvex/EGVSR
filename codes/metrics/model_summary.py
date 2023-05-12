@@ -51,13 +51,13 @@ def register(model, dummy_input_dict):
 
 
 def profile_model(model):
-    tot_gflops = 0
-    for module_info in model_info_lst:
-        if module_info['gflops']:
-            tot_gflops += module_info['gflops']
-
-    tot_params = 0
-    for param in model.parameters():
-        tot_params += torch.prod(torch.tensor(param.size())).item()
-
+    tot_gflops = sum(
+        module_info['gflops']
+        for module_info in model_info_lst
+        if module_info['gflops']
+    )
+    tot_params = sum(
+        torch.prod(torch.tensor(param.size())).item()
+        for param in model.parameters()
+    )
     return tot_gflops, tot_params

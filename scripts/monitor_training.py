@@ -17,7 +17,7 @@ def append(loss_dict, loss_name, loss_value):
 
 
 def split(pattern, string):
-    return re.split(r'\s*{}\s*'.format(pattern), string)
+    return re.split(f'\s*{pattern}\s*', string)
 
 
 def parse_log(log_file):
@@ -36,36 +36,32 @@ def parse_log(log_file):
     metric_dict = {}  # {'iter': [], 'sequence1': {'metric1': [], 'metric2':[]}, ...}
     last_test_sequence = ''
     for line in lines:
-        loss_match = re.match(loss_pattern, line)
-        if loss_match:
-            iter = int(loss_match.group(1))
+        if loss_match := re.match(loss_pattern, line):
+            iter = int(loss_match[1])
             append(loss_dict, 'iter', iter)
-            for s in split(',', loss_match.group(2)):
+            for s in split(',', loss_match[2]):
                 if s:
                     k, v = split(':', s)
                     append(loss_dict, k, float(v))
 
-        metric_match1 = re.match(metric_pattern1, line)
-        if metric_match1:
-            last_test_sequence = metric_match1.group(1)
+        if metric_match1 := re.match(metric_pattern1, line):
+            last_test_sequence = metric_match1[1]
             if last_test_sequence not in metric_dict:
                 metric_dict[last_test_sequence] = {}
 
-        metric_match2 = re.match(metric_pattern2, line)
-        if metric_match2:
+        if metric_match2 := re.match(metric_pattern2, line):
             last_test_sequence = 'Average'
             if last_test_sequence not in metric_dict:
                 metric_dict[last_test_sequence] = {}
 
-        metric_match3 = re.match(metric_pattern3, line)
-        if metric_match3:
+        if metric_match3 := re.match(metric_pattern3, line):
             iter = loss_dict['iter'][-1]
             # enforce to add a new iter
             if 'iter' not in metric_dict or metric_dict['iter'][-1] != iter:
                 append(metric_dict, 'iter', iter)
 
-            k = metric_match3.group(1)
-            v = float(metric_match3.group(2)) * float(metric_match3.group(3))
+            k = metric_match3[1]
+            v = float(metric_match3[2]) * float(metric_match3[3])
             append(metric_dict[last_test_sequence], k, v)
 
     return loss_dict, metric_dict
@@ -87,9 +83,9 @@ def parse_json(json_file):
 def plot_curve(ax, iter, value, style='-', alpha=1.0, label='', color='seagreen',
                start_iter=0, end_iter=-1, smooth=0, linewidth=1.0):
 
-    assert len(iter) == len(value), \
-        'mismatch in <iter> and <value> ({} vs {})'.format(
-            len(iter), len(value))
+    assert len(iter) == len(
+        value
+    ), f'mismatch in <iter> and <value> ({len(iter)} vs {len(value)})'
     l = len(iter)
 
     if smooth:
@@ -160,10 +156,10 @@ def monitor_VSR(exp_dir, testset):
     # ================ parse logs ================#
     loss_dict = {}    # {'model1': {'loss1': x1, ...}, ...}
     metric_dict = {}  # {'model1': {'metric1': x1, ...}, ...}
-    for log_info in log_info_lst:
-        # model_idx = '{} [{}]'.format(*log_info)
-        model_idx = 'FRVSR'
+    # model_idx = '{} [{}]'.format(*log_info)
+    model_idx = 'FRVSR'
 
+    for log_info in log_info_lst:
         # parse log
         log_file = osp.join(
             exp_dir, '{}/{}/train/train.log'.format(*log_info))
@@ -181,7 +177,7 @@ def monitor_VSR(exp_dir, testset):
     base_figsize = (12, 2 * math.ceil(n_loss / 2))
     fig = plt.figure(1, figsize=base_figsize)
     for i in range(n_loss):
-        ax = fig.add_subplot('{}{}{}'.format(math.ceil(n_loss / 2), 2, i + 1))
+        ax = fig.add_subplot(f'{math.ceil(n_loss / 2)}2{i + 1}')
         plot_loss_curves(
             loss_dict, ax, loss_lst[i], start_iter=start_iter,
             smooth=loss_smooth)
@@ -191,8 +187,7 @@ def monitor_VSR(exp_dir, testset):
     base_figsize = (12, 2 * math.ceil(n_metric / 2))
     fig = plt.figure(2, figsize=base_figsize)
     for i in range(n_metric):
-        ax = fig.add_subplot(
-            '{}{}{}'.format(math.ceil(n_metric / 2), 2, i + 1))
+        ax = fig.add_subplot(f'{math.ceil(n_metric / 2)}2{i + 1}')
         plot_metric_curves(
             metric_dict, ax, metric_lst[i], start_iter=start_iter)
 
@@ -231,10 +226,10 @@ def monitor_VSRGAN(exp_dir, testset):
     # ================ parse logs ================#
     loss_dict = {}    # {'model1': {'loss1': x1, ...}, ...}
     metric_dict = {}  # {'model1': {'metric1': x1, ...}, ...}
-    for log_info in log_info_lst:
-        # model_idx = '{} [{}]'.format(*log_info)
-        model_idx = 'VSR GAN'
+    # model_idx = '{} [{}]'.format(*log_info)
+    model_idx = 'VSR GAN'
 
+    for log_info in log_info_lst:
         # parse log
         log_file = osp.join(
             exp_dir, '{}/{}/train/train.log'.format(*log_info))
@@ -251,7 +246,7 @@ def monitor_VSRGAN(exp_dir, testset):
     n_loss = len(loss_lst)
     fig = plt.figure(1, figsize=base_figsize)
     for i in range(n_loss):
-        ax = fig.add_subplot('{}{}{}'.format(math.ceil(n_loss / 2), 2, i + 1))
+        ax = fig.add_subplot(f'{math.ceil(n_loss / 2)}2{i + 1}')
         plot_loss_curves(
             loss_dict, ax, loss_lst[i], start_iter=start_iter,
             smooth=loss_smooth)
@@ -260,8 +255,7 @@ def monitor_VSRGAN(exp_dir, testset):
     n_metric = len(metric_lst)
     fig = plt.figure(2, figsize=base_figsize)
     for i in range(n_metric):
-        ax = fig.add_subplot(
-            '{}{}{}'.format(math.ceil(n_metric / 2), 2, i + 1))
+        ax = fig.add_subplot(f'{math.ceil(n_metric / 2)}2{i + 1}')
         plot_metric_curves(
             metric_dict, ax, metric_lst[i], start_iter=start_iter)
 
@@ -278,13 +272,13 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str, required=True,
                         help='which testset to show')
     args = parser.parse_args()
-    
+
     # select model
-    exp_dir = 'experiments_{}'.format(args.degradation)
+    exp_dir = f'experiments_{args.degradation}'
 
     if args.model == 'FRVSR':
         monitor_VSR(exp_dir, args.dataset)
     elif args.model == 'TecoGAN':
         monitor_VSRGAN(exp_dir, args.dataset)
     else:
-        raise ValueError('Unrecoginzed model: {}'.format(args.model))
+        raise ValueError(f'Unrecoginzed model: {args.model}')

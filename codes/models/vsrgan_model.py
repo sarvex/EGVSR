@@ -27,30 +27,31 @@ class VSRGANModel(VSRModel):
         # define net G
         self.net_G = define_generator(self.opt).to(self.device)
         if self.verbose:
-            self.logger.info('Generator: {}\n'.format(
-                self.opt['model']['generator']['name']) + self.net_G.__str__())
+            self.logger.info(
+                f"Generator: {self.opt['model']['generator']['name']}\n{self.net_G.__str__()}"
+            )
 
         # load net G
         load_path_G = self.opt['model']['generator'].get('load_path')
         if load_path_G is not None:
             self.load_network(self.net_G, load_path_G)
             if self.verbose:
-                self.logger.info('Loaded generator from: {}'.format(load_path_G))
+                self.logger.info(f'Loaded generator from: {load_path_G}')
 
         if self.is_train:
             # define net D
             self.net_D = define_discriminator(self.opt).to(self.device)
             if self.verbose:
-                self.logger.info('Discriminator: {}\n'.format(
-                    self.opt['model']['discriminator']['name']) + self.net_D.__str__())
+                self.logger.info(
+                    f"Discriminator: {self.opt['model']['discriminator']['name']}\n{self.net_D.__str__()}"
+                )
 
             # load net D
             load_path_D = self.opt['model']['discriminator'].get('load_path')
             if load_path_D is not None:
                 self.load_network(self.net_D, load_path_D)
                 if self.verbose:
-                    self.logger.info('Loaded discriminator from: {}'.format(
-                        load_path_D))
+                    self.logger.info(f'Loaded discriminator from: {load_path_D}')
 
     def config_training(self):
         # set criterions
@@ -171,7 +172,7 @@ class VSRGANModel(VSRModel):
             'crop_border_ratio': self.opt['train']['discriminator'].get(
                 'crop_border_ratio', 1.0)
         }
-        net_D_input_dict.update(net_G_output_dict)
+        net_D_input_dict |= net_G_output_dict
 
         # forward real sequence (gt)
         real_pred, net_D_oputput_dict = self.net_D.forward_sequence(
@@ -257,10 +258,10 @@ class VSRGANModel(VSRModel):
 
             hr_feat_lst = self.net_F(hr_merge)
             gt_feat_lst = self.net_F(gt_merge)
-            loss_feat_G = 0
-            for hr_feat, gt_feat in zip(hr_feat_lst, gt_feat_lst):
-                loss_feat_G += self.feat_crit(hr_feat, gt_feat.detach())
-
+            loss_feat_G = sum(
+                self.feat_crit(hr_feat, gt_feat.detach())
+                for hr_feat, gt_feat in zip(hr_feat_lst, gt_feat_lst)
+            )
             feat_w = self.opt['train']['feature_crit'].get('weight', 1)
             loss_feat_G = feat_w * loss_feat_G
             loss_G += loss_feat_G

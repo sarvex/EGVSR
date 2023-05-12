@@ -12,8 +12,8 @@ class SOFVSRModel(BaseModel):
         super(SOFVSRModel, self).__init__(opt)
 
         if self.verbose:
-            self.logger.info('{} Model Info {}'.format('=' * 20, '=' * 20))
-            self.logger.info('Model: {}'.format(opt['model']['name']))
+            self.logger.info(f"{'=' * 20} Model Info {'=' * 20}")
+            self.logger.info(f"Model: {opt['model']['name']}")
 
         # set network
         self.set_network()
@@ -22,15 +22,16 @@ class SOFVSRModel(BaseModel):
         # define net G
         self.net_G = define_generator(self.opt).to(self.device)
         if self.verbose:
-            self.logger.info('Generator: {}\n'.format(
-                self.opt['model']['generator']['name']) + self.net_G.__str__())
+            self.logger.info(
+                f"Generator: {self.opt['model']['generator']['name']}\n{self.net_G.__str__()}"
+            )
 
         # load network
         load_path_G = self.opt['model']['generator'].get('load_path')
         if load_path_G is not None:
             self.load_network(self.net_G, load_path_G)
             if self.verbose:
-                self.logger.info('Load generator from: {}'.format(load_path_G))
+                self.logger.info(f'Load generator from: {load_path_G}')
 
     def infer(self, lr_data):
 
@@ -58,9 +59,7 @@ class SOFVSRModel(BaseModel):
         hr_yuv = hr_yuv.permute(0, 2, 3, 1)  # tchw
 
         hr_rgb = data_utils.yCbCr2rgb(hr_yuv).numpy()
-        hr_seq = data_utils.float32_to_uint8(hr_rgb) # thwc|rgb|uint8
-
-        return hr_seq
+        return data_utils.float32_to_uint8(hr_rgb)
 
     # def eval(self, inputs, labels=None, **kwargs):
     #     metrics = {}

@@ -50,10 +50,14 @@ for r in range(row):
         pos = (c * (roi_w + pad), r * (roi_h + pad))
         box = (ROI[r][0][0], ROI[r][0][1], ROI[r][1][0], ROI[r][1][1])
         if c == col-1:
-            gt_img_path = os.path.join(GT_root_path, dataset, 'GT', name[r], 'im{}.png'.format(frm_num))
+            gt_img_path = os.path.join(
+                GT_root_path, dataset, 'GT', name[r], f'im{frm_num}.png'
+            )
             src_im = Image.open(gt_img_path)
         else:
-            src_path = os.path.join(Rst_root_path, dataset, Rst[c], name[r], 'im{}.png'.format(frm_num))
+            src_path = os.path.join(
+                Rst_root_path, dataset, Rst[c], name[r], f'im{frm_num}.png'
+            )
             src_im = Image.open(src_path)
         img_crop = src_im.crop(box)
         img_resi = img_crop.resize(size=(roi_w, roi_h))
@@ -61,6 +65,6 @@ for r in range(row):
         font_color = 'white' if c != 4 else 'red'
         label.text(xy=pos, text=label_name[c], fill=font_color, font=font)
 
-dest_im_path = os.path.join(rst_path, 'cmp_{}.png'.format(dataset))
+dest_im_path = os.path.join(rst_path, f'cmp_{dataset}.png')
 dest_im.save(dest_im_path, 'png')
 dest_im.show()  # finish

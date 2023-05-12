@@ -36,45 +36,42 @@ if __name__ == '__main__':
     # evalte Gvt72:
     model_list = os.listdir(Gvt72_SR)
     for model in model_list:
-        print('test dataset:Gvt72,\tmodel:{}'.format(model))
+        print(f'test dataset:Gvt72,\tmodel:{model}')
         Gvt72_SR_dir = os.path.join(Gvt72_SR, model)
 
         Gvt72_GT_lst = [
             osp.join(Gvt72_GT_dir, vid) for vid in Gvt72_vids]
         Gvt72_SR_lst = [
             osp.join(Gvt72_SR_dir, vid) for vid in Gvt72_vids]
-        os.system('python codes/official_metrics/metrics.py --output {} --results {} --targets {}'.format(
-            osp.join(Gvt72_SR_dir, 'metric_log'),
-            ','.join(Gvt72_SR_lst),
-            ','.join(Gvt72_GT_lst)))
+        os.system(
+            f"python codes/official_metrics/metrics.py --output {osp.join(Gvt72_SR_dir, 'metric_log')} --results {','.join(Gvt72_SR_lst)} --targets {','.join(Gvt72_GT_lst)}"
+        )
 
     # evaluate Tos3:
     model_list = os.listdir(ToS3_SR)
     for model in model_list:
-        print('test dataset:ToS3,\tmodel:{}'.format(model))
+        print(f'test dataset:ToS3,\tmodel:{model}')
         ToS3_SR_dir = os.path.join(ToS3_SR, model)
 
         ToS3_GT_lst = [
             osp.join(ToS3_GT_dir, vid) for vid in ToS3_vids]
         ToS3_SR_lst = [
             osp.join(ToS3_SR_dir, vid) for vid in ToS3_vids]
-        os.system('python codes/official_metrics/metrics.py --output {} --results {} --targets {}'.format(
-            osp.join(ToS3_SR_dir, 'metric_log'),
-            ','.join(ToS3_SR_lst),
-            ','.join(ToS3_GT_lst)))
+        os.system(
+            f"python codes/official_metrics/metrics.py --output {osp.join(ToS3_SR_dir, 'metric_log')} --results {','.join(ToS3_SR_lst)} --targets {','.join(ToS3_GT_lst)}"
+        )
 
     # evaluate Vid4
     model_list = os.listdir(Vid4_SR)
     for model in model_list:
-        print('test dataset:Vid4,\tmodel:{}'.format(model))
+        print(f'test dataset:Vid4,\tmodel:{model}')
         Vid4_SR_dir = os.path.join(Vid4_SR, model)
 
         Vid4_GT_lst = [
             osp.join(Vid4_GT_dir, vid) for vid in Vid4_vids]
         Vid4_SR_lst = [
             osp.join(Vid4_SR_dir, vid) for vid in Vid4_vids]
-        os.system('python codes/official_metrics/metrics.py --output {} --results {} --targets {}'.format(
-            osp.join(Vid4_SR_dir, 'metric_log'),
-            ','.join(Vid4_SR_lst),
-            ','.join(Vid4_GT_lst)))
+        os.system(
+            f"python codes/official_metrics/metrics.py --output {osp.join(Vid4_SR_dir, 'metric_log')} --results {','.join(Vid4_SR_lst)} --targets {','.join(Vid4_GT_lst)}"
+        )
 

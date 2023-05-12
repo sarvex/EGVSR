@@ -57,18 +57,11 @@ class PNet(nn.Module):
             all_scores = []
         for (kk,out0) in enumerate(outs0):
             cur_score = (1.-util.cos_sim(outs0[kk],outs1[kk]))
-            if(kk==0):
-                val = 1.*cur_score
-            else:
-                # val = val + self.lambda_feat_layers[kk]*cur_score
-                val = val + cur_score
+            val = 1.*cur_score if (kk==0) else val + cur_score
             if(retPerLayer):
                 all_scores+=[cur_score]
 
-        if(retPerLayer):
-            return (val, all_scores)
-        else:
-            return val
+        return (val, all_scores) if retPerLayer else val
 
 # Learned perceptual metric
 class PNetLin(nn.Module):
@@ -160,9 +153,7 @@ class PNetLin(nn.Module):
             lin_models = [self.lin0, self.lin1, self.lin2, self.lin3, self.lin4]
             if(self.pnet_type=='squeeze'):
                 lin_models.extend([self.lin5, self.lin6])
-            res = [lin_models[kk].model(diffs[kk]) for kk in range(len(diffs))]
-            return res
-			
+            return [lin_models[kk].model(diffs[kk]) for kk in range(len(diffs))]
         val = torch.mean(torch.mean(self.lin0.model(diffs[0]),dim=3),dim=2)
         val = val + torch.mean(torch.mean(self.lin1.model(diffs[1]),dim=3),dim=2)
         val = val + torch.mean(torch.mean(self.lin2.model(diffs[2]),dim=3),dim=2)
@@ -233,10 +224,14 @@ class L2(FakeNet):
     def forward(self, in0, in1):
         assert(in0.size()[0]==1) # currently only supports batchSize 1
 
-        if(self.colorspace=='RGB'):
+        if (self.colorspace=='RGB'):
             (N,C,X,Y) = in0.size()
-            value = torch.mean(torch.mean(torch.mean((in0-in1)**2,dim=1).view(N,1,X,Y),dim=2).view(N,1,1,Y),dim=3).view(N)
-            return value
+            return torch.mean(
+                torch.mean(
+                    torch.mean((in0 - in1) ** 2, dim=1).view(N, 1, X, Y), dim=2
+                ).view(N, 1, 1, Y),
+                dim=3,
+            ).view(N)
         elif(self.colorspace=='Lab'):
             value = util.l2(util.tensor2np(util.tensor2tensorlab(in0.data,to_norm=False)), 
                 util.tensor2np(util.tensor2tensorlab(in1.data,to_norm=False)), range=100.).astype('float')
@@ -261,8 +256,6 @@ class DSSIM(FakeNet):
         return ret_var
 
 def print_network(net):
-    num_params = 0
-    for param in net.parameters():
-        num_params += param.numel()
+    num_params = sum(param.numel() for param in net.parameters())
     print('Network',net)
     print('Total number of parameters: %d' % num_params)

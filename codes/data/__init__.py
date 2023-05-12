@@ -10,13 +10,15 @@ from .paired_folder_dataset import PairedFolderDataset
 def create_dataloader(opt, dataset_idx='train'):
     # setup params
     data_opt = opt['dataset'].get(dataset_idx)
-    degradation_type = opt['dataset']['degradation']['type']
-
     # -------------- loader for training -------------- #
     if dataset_idx == 'train':
         # check dataset
-        assert data_opt['name'] in ('VimeoTecoGAN', 'VimeoTecoGAN-sub'), \
-            'Unknown Dataset: {}'.format(data_opt['name'])
+        assert data_opt['name'] in (
+            'VimeoTecoGAN',
+            'VimeoTecoGAN-sub',
+        ), f"Unknown Dataset: {data_opt['name']}"
+
+        degradation_type = opt['dataset']['degradation']['type']
 
         if degradation_type == 'BI':
             # create dataset
@@ -41,8 +43,7 @@ def create_dataloader(opt, dataset_idx='train'):
                 moving_factor=opt['train'].get('moving_factor', 1.0))
 
         else:
-            raise ValueError('Unrecognized degradation type: {}'.format(
-                degradation_type))
+            raise ValueError(f'Unrecognized degradation type: {degradation_type}')
 
         # create data loader
         loader = DataLoader(
@@ -52,7 +53,6 @@ def create_dataloader(opt, dataset_idx='train'):
             num_workers=data_opt['num_workers'],
             pin_memory=data_opt['pin_memory'])
 
-    # -------------- loader for testing -------------- #
     elif dataset_idx.startswith('test'):
         # create data loader
         dataset = PairedFolderDataset(data_opt, scale=opt['scale'])
@@ -64,7 +64,7 @@ def create_dataloader(opt, dataset_idx='train'):
             pin_memory=data_opt['pin_memory'])
 
     else:
-        raise ValueError('Unrecognized dataset index: {}'.format(dataset_idx))
+        raise ValueError(f'Unrecognized dataset index: {dataset_idx}')
 
     return loader
 
@@ -109,7 +109,6 @@ def prepare_data(opt, data, kernel):
         gt_data = gt_data.view(n, t, c, scale * lr_h, scale * lr_w)
 
     else:
-        raise ValueError('Unrecognized degradation type: {}'.format(
-            degradation_type))
+        raise ValueError(f'Unrecognized degradation type: {degradation_type}')
 
     return { 'gt': gt_data, 'lr': lr_data }

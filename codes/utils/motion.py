@@ -16,9 +16,7 @@ def nd_meshgrid(*size, permute=None):
     _error_msg = ("Permute index must match mesh dimensions, "
                   "should have {} indexes but got {}")
     size = np.array(size)
-    ranges = []
-    for x in size:
-        ranges.append(np.linspace(-1, 1, x))
+    ranges = [np.linspace(-1, 1, x) for x in size]
     mesh = np.stack(np.meshgrid(*ranges, indexing='ij'))
     if permute is not None:
         if len(permute) != len(size):
@@ -195,7 +193,7 @@ class Flownet(nn.Module):
         f = 32
         layers = []
         in_c = channel * 2
-        for i in range(3):
+        for _ in range(3):
             layers += [nn.Conv2d(in_c, f, 3, 1, 1),
                        nn.LeakyReLU(0.2, inplace=True)]
             layers += [nn.Conv2d(f, f, 3, 1, 1),
@@ -203,7 +201,7 @@ class Flownet(nn.Module):
             layers += [nn.MaxPool2d(2)]
             in_c = f
             f *= 2
-        for i in range(3):
+        for _ in range(3):
             layers += [nn.Conv2d(in_c, f, 3, 1, 1),
                        nn.LeakyReLU(0.2, inplace=True)]
             layers += [nn.Conv2d(f, f, 3, 1, 1),

@@ -15,7 +15,7 @@ def test(opt):
     # logging
     logger = base_utils.get_logger('base')
     if opt['verbose']:
-        logger.info('{} Configurations {}'.format('=' * 20, '=' * 20))
+        logger.info(f"{'=' * 20} Configurations {'=' * 20}")
         base_utils.print_options(opt, logger)
 
     # infer and evaluate performance for each model
@@ -25,7 +25,7 @@ def test(opt):
 
         # log
         logger.info('=' * 40)
-        logger.info('Testing model: {}'.format(model_idx))
+        logger.info(f'Testing model: {model_idx}')
         logger.info('=' * 40)
 
         # create model
@@ -39,19 +39,15 @@ def test(opt):
                 continue
 
             ds_name = opt['dataset'][dataset_idx]['name']
-            logger.info('Testing on {}: {}'.format(dataset_idx, ds_name))
+            logger.info(f'Testing on {dataset_idx}: {ds_name}')
 
             # create data loader
             test_loader = create_dataloader(opt, dataset_idx=dataset_idx)
 
             # infer and store results for each sequence
-            for i, data in enumerate(test_loader):
-
+            for data in test_loader:
                 # fetch data
                 lr_data = data['lr'][0]
-                seq_idx = data['seq_idx'][0]
-                frm_idx = [frm_idx[0] for frm_idx in data['frm_idx']]
-
                 # infer
                 hr_seq = model.infer(lr_data)  # thwc|rgb|uint8
 
@@ -59,7 +55,10 @@ def test(opt):
                 if opt['test']['save_res']:
                     res_dir = osp.join(
                         opt['test']['res_dir'], ds_name, model_idx)
+                    seq_idx = data['seq_idx'][0]
                     res_seq_dir = osp.join(res_dir, seq_idx)
+                    frm_idx = [frm_idx[0] for frm_idx in data['frm_idx']]
+
                     data_utils.save_sequence(
                         res_seq_dir, hr_seq, frm_idx, to_bgr=True)
 
@@ -149,13 +148,12 @@ if __name__ == '__main__':
                 # rst = fnet(lr_curr, lr_prev)
                 rst = srnet(lr_curr, hr_prev_warp)
             except RuntimeError as e:
-                if 'out of memory' in str(e):
-                    print('| WARNING: ran out of memory')
-                    if hasattr(torch.cuda, 'empty_cache'):
-                        torch.cuda.empty_cache()
-                else:
+                if 'out of memory' not in str(e):
                     raise e
 
+                print('| WARNING: ran out of memory')
+                if hasattr(torch.cuda, 'empty_cache'):
+                    torch.cuda.empty_cache()
         end_time = time.time()
         tot_time += end_time - start_time
 

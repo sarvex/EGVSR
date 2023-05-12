@@ -32,8 +32,8 @@ def generate_mask(h, w, split_rate: float):
 
 def generate_image(lr, sr, mix_path):
 
-    lr_imgs = sorted(glob.glob('{}/*'.format(lr)))
-    sr_imgs = sorted(glob.glob('{}/*'.format(sr)))
+    lr_imgs = sorted(glob.glob(f'{lr}/*'))
+    sr_imgs = sorted(glob.glob(f'{sr}/*'))
 
     frame_num = min(len(lr_imgs), len(sr_imgs))
 
@@ -66,9 +66,7 @@ def generate_image(lr, sr, mix_path):
 
 def create_gif(image_list, gif_name, dur):
 
-    frames = []
-    for image_name in image_list:
-        frames.append(imageio.imread(image_name))
+    frames = [imageio.imread(image_name) for image_name in image_list]
     # Save them as frames into a gif
     imageio.mimsave(gif_name, frames, 'GIF', duration=dur)
     return
@@ -92,6 +90,6 @@ if __name__ == '__main__':
 
     image_list = sorted(glob.glob(image_path))
 
-    create_gif(image_list, '{}.gif'.format(dataset), dur=0.1)
+    create_gif(image_list, f'{dataset}.gif', dur=0.1)
 
     print("finish")

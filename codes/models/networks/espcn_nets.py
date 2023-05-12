@@ -34,11 +34,7 @@ class ESPNet(BaseSequenceGenerator):
 
         lr_curr = torch.rand(1, c, lr_h, lr_w, dtype=torch.float32)
 
-        data_dict = {
-            'lr_curr': lr_curr
-        }
-
-        return data_dict
+        return {'lr_curr': lr_curr}
 
     def forward(self, lr_curr):
         x = lr_curr

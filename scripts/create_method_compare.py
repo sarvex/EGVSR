@@ -46,8 +46,10 @@ GT_root_path = '../data/'
 Rst_root_path = '../results/'
 Rst = ['vespcn_ep0500', 'SOFVSR_x4', 'DUF-16L', 'TecoGAN_BD_iter500000']
 
-gt_img_path = os.path.join(GT_root_path, dataset, 'GT', name, '00{}.png'.format(num))
-lr_img_path = os.path.join(GT_root_path, dataset, 'Gaussian4xLR', name, '00{}.png'.format(num))
+gt_img_path = os.path.join(GT_root_path, dataset, 'GT', name, f'00{num}.png')
+lr_img_path = os.path.join(
+    GT_root_path, dataset, 'Gaussian4xLR', name, f'00{num}.png'
+)
 
 img_gt = Image.open(gt_img_path)
 img_lr = Image.open(lr_img_path)
@@ -91,10 +93,14 @@ for i in range(row*col):
         img_resi = img_crop.resize(size=(roi_w, roi_h))
     else:
         try:
-            src_path = os.path.join(Rst_root_path, dataset, Rst[Rst_num], name, '00{}.png'.format(num))
+            src_path = os.path.join(
+                Rst_root_path, dataset, Rst[Rst_num], name, f'00{num}.png'
+            )
             src_im = Image.open(src_path)
         except:
-            src_path = os.path.join(Rst_root_path, dataset, Rst[Rst_num], name, 'Frame0{}.png'.format(num))
+            src_path = os.path.join(
+                Rst_root_path, dataset, Rst[Rst_num], name, f'Frame0{num}.png'
+            )
             src_im = Image.open(src_path)
         img_crop = src_im.crop(pos)
         img_resi = img_crop.resize(size=(roi_w, roi_h))
@@ -110,22 +116,24 @@ for i in range(row*col):
         src_im = Image.open(lr_img_path)
         img_resi = src_im.resize(size=src_wh)
         img_crop = img_resi.crop(pos)
-        img_resi = img_crop.resize(size=(roi_w, roi_h))
         Rst_num = 0
     elif i == 5:
         src_im = Image.open(gt_img_path)
         img_crop = src_im.crop(pos)
-        img_resi = img_crop.resize(size=(roi_w, roi_h))
     else:
         try:
-            src_path = os.path.join(Rst_root_path, dataset, Rst[Rst_num], name, '00{}.png'.format(num))
+            src_path = os.path.join(
+                Rst_root_path, dataset, Rst[Rst_num], name, f'00{num}.png'
+            )
             src_im = Image.open(src_path)
         except:
-            src_path = os.path.join(Rst_root_path, dataset, Rst[Rst_num], name, 'Frame0{}.png'.format(num))
+            src_path = os.path.join(
+                Rst_root_path, dataset, Rst[Rst_num], name, f'Frame0{num}.png'
+            )
             src_im = Image.open(src_path)
         img_crop = src_im.crop(pos)
-        img_resi = img_crop.resize(size=(roi_w, roi_h))
         Rst_num += 1
+    img_resi = img_crop.resize(size=(roi_w, roi_h))
     dest_im.paste(img_resi, box)  # paste to dest_im
     font_color = 'white' if i != 4 else 'red'
     label.text(xy=box, text=label_name[i], fill=font_color, font=font)
@@ -134,6 +142,6 @@ for i in range(row*col):
 window = (0, 0, img_size[0] + col * (roi_w + pad), img_size[1])
 rst_im = dest_im.crop(window)
 
-dest_im_path = os.path.join(rst_path, 'cmp_{}_{}_{}.png'.format(dataset, name, num))
+dest_im_path = os.path.join(rst_path, f'cmp_{dataset}_{name}_{num}.png')
 rst_im.save(dest_im_path, 'png')
 rst_im.show()  # finish

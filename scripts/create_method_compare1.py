@@ -37,7 +37,9 @@ input_im = Image.new('RGBA', (seq_num * (img_w + pad) - pad, img_h), (255, 255, 
 label_n = ImageDraw.ImageDraw(input_im)
 
 for i in range(seq_num):
-    lr_img_path = os.path.join(GT_root_path, dataset, 'Gaussian4xLR', name[i], '{}.png'.format(frm_num[i]))
+    lr_img_path = os.path.join(
+        GT_root_path, dataset, 'Gaussian4xLR', name[i], f'{frm_num[i]}.png'
+    )
     img_lr = Image.open(lr_img_path)
     pos = (i * (img_w + pad), 0)
     draw = ImageDraw.ImageDraw(img_lr)
@@ -47,7 +49,7 @@ for i in range(seq_num):
     input_im.paste(img_lr, pos)  # paste to input_im
     label_n.text(xy=pos, text=name[i], fill='white', font=font)
 
-input_im_path = os.path.join(rst_path, 'input_img_{}.png'.format(dataset))
+input_im_path = os.path.join(rst_path, f'input_img_{dataset}.png')
 input_im.save(input_im_path, 'png')
 input_im.show()  # finish
 
@@ -66,7 +68,9 @@ for i in range(seq_num):
     dest_im = Image.new('RGBA', (col * (roi_w + pad) - pad, row * roi_h + pad), (255, 255, 255))
     label = ImageDraw.ImageDraw(dest_im)
 
-    gt_img_path = os.path.join(GT_root_path, dataset, 'GT', name[i], '{}.png'.format(frm_num[i]))
+    gt_img_path = os.path.join(
+        GT_root_path, dataset, 'GT', name[i], f'{frm_num[i]}.png'
+    )
     img_gt = Image.open(gt_img_path)
 
     print(roi_h, roi_w, roi_h/roi_w)
@@ -78,7 +82,13 @@ for i in range(seq_num):
             if c == col-1:
                 src_im = img_gt
             else:
-                src_path = os.path.join(Rst_root_path, dataset, Rst[c], name[i], '{}.png'.format(frm_num[i]))
+                src_path = os.path.join(
+                    Rst_root_path,
+                    dataset,
+                    Rst[c],
+                    name[i],
+                    f'{frm_num[i]}.png',
+                )
                 src_im = Image.open(src_path)
             img_crop = src_im.crop(box)
             img_resi = img_crop.resize(size=(roi_w, roi_h))
@@ -86,6 +96,8 @@ for i in range(seq_num):
             font_color = 'white' if c != 4 else 'red'
             label.text(xy=pos, text=label_name[c], fill=font_color, font=font)
 
-    dest_im_path = os.path.join(rst_path, 'cmp_{}_{}_{}.png'.format(dataset, name[i], frm_num[i]))
+    dest_im_path = os.path.join(
+        rst_path, f'cmp_{dataset}_{name[i]}_{frm_num[i]}.png'
+    )
     dest_im.save(dest_im_path, 'png')
     dest_im.show()  # finish

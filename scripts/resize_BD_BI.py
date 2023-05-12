@@ -18,14 +18,14 @@ dataset = 'Gvt72'
 degrade_mode = 'BD' # 'BD' or 'BI'
 
 n_process = 16  # the number of process to be used for downsampling
-filepaths = glob.glob('../data/{}/GT/*/*.png'.format(dataset))
+filepaths = glob.glob(f'../data/{dataset}/GT/*/*.png')
 gt_dir_idx = 'GT'
 lr_dir_idx = 'Gaussian4xLR' if degrade_mode=='BD' else 'Bicubic4xLR'
 
 
 def downsample_worker(filepath, mode='BD'):
     # log
-    print('Mode:{}, Processing {}'.format(mode, filepath))
+    print(f'Mode:{mode}, Processing {filepath}')
 
     # setup dirs
     gt_folder, img_idx = osp.split(filepath)
@@ -48,7 +48,7 @@ def downsample_worker(filepath, mode='BD'):
 
 if __name__ == '__main__':
     # setup dirs
-    print('# of images: {}'.format(len(filepaths)))
+    print(f'# of images: {len(filepaths)}')
     for filepath in filepaths:
         gt_folder, _ = osp.split(filepath)
         lr_folder = gt_folder.replace(gt_dir_idx, lr_dir_idx)

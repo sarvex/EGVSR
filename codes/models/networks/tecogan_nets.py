@@ -93,9 +93,7 @@ class ResidualBlock(nn.Module):
             nn.Conv2d(nf, nf, 3, 1, 1, bias=True))
 
     def forward(self, x):
-        out = self.conv(x) + x
-
-        return out
+        return self.conv(x) + x
 
 
 class SRNet(nn.Module):
@@ -166,13 +164,7 @@ class FRNet(BaseSequenceGenerator):
         lr_prev = torch.rand(1, c, lr_h, lr_w, dtype=torch.float32)
         hr_prev = torch.rand(1, c, s * lr_h, s * lr_w, dtype=torch.float32)
 
-        data_dict = {
-            'lr_curr': lr_curr,
-            'lr_prev': lr_prev,
-            'hr_prev': hr_prev
-        }
-
-        return data_dict
+        return {'lr_curr': lr_curr, 'lr_prev': lr_prev, 'hr_prev': hr_prev}
 
     def forward(self, lr_curr, lr_prev, hr_prev):
         """
@@ -219,14 +211,11 @@ class FRNet(BaseSequenceGenerator):
         hr_flow = self.scale * self.upsample_func(lr_flow)
         hr_flow = hr_flow.view(n, (t - 1), 2, hr_h, hr_w)
 
-        # compute the first hr data
-        hr_data = []
         hr_prev = self.srnet(
             lr_data[:, 0, ...],
             torch.zeros(n, (self.scale**2)*c, lr_h, lr_w, dtype=torch.float32,
                         device=lr_data.device))
-        hr_data.append(hr_prev)
-
+        hr_data = [hr_prev]
         # compute the remaining hr data
         for i in range(1, t):
             # warp hr_prev
@@ -243,16 +232,13 @@ class FRNet(BaseSequenceGenerator):
 
         hr_data = torch.stack(hr_data, dim=1)  # n,t,c,hr_h,hr_w
 
-        # construct output dict
-        ret_dict = {
+        return {
             'hr_data': hr_data,  # n,t,c,hr_h,hr_w
             'hr_flow': hr_flow,  # n,t,2,hr_h,hr_w
             'lr_prev': lr_prev,  # n(t-1),c,lr_h,lr_w
             'lr_curr': lr_curr,  # n(t-1),c,lr_h,lr_w
             'lr_flow': lr_flow,  # n(t-1),2,lr_h,lr_w
         }
-
-        return ret_dict
 
     def infer_sequence(self, lr_data, device):
         """

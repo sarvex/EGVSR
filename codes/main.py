@@ -18,7 +18,7 @@ from utils import base_utils, data_utils
 def train(opt):
     # logging
     logger = base_utils.get_logger('base')
-    logger.info('{} Options {}'.format('='*20, '='*20))
+    logger.info(f"{'=' * 20} Options {'=' * 20}")
     base_utils.print_options(opt, logger)
 
     # create data loader
@@ -41,9 +41,8 @@ def train(opt):
     log_freq = opt['logger']['log_freq']
     ckpt_freq = opt['logger']['ckpt_freq']
 
-    logger.info('Number of training samples: {}'.format(total_sample))
-    logger.info('Total epochs needed: {} for {} iterations'.format(
-        total_epoch, total_iter))
+    logger.info(f'Number of training samples: {total_sample}')
+    logger.info(f'Total epochs needed: {total_epoch} for {total_iter} iterations')
 
     # train
     for epoch in range(total_epoch):
@@ -70,7 +69,7 @@ def train(opt):
             # log
             if log_freq > 0 and iter % log_freq == 0:
                 # basic info
-                msg = '[epoch: {} | iter: {}'.format(epoch, curr_iter)
+                msg = f'[epoch: {epoch} | iter: {curr_iter}'
                 for lr_type, lr in model.get_current_learning_rate().items():
                     msg += ' | {}: {:.2e}'.format(lr_type, lr)
                 msg += '] '
@@ -89,7 +88,7 @@ def train(opt):
             # evaluate performance
             if test_freq > 0 and iter % test_freq == 0:
                 # setup model index
-                model_idx = 'G_iter{}'.format(curr_iter)
+                model_idx = f'G_iter{curr_iter}'
 
                 # for each testset
                 for dataset_idx in sorted(opt['dataset'].keys()):
@@ -98,8 +97,7 @@ def train(opt):
                         continue
 
                     ds_name = opt['dataset'][dataset_idx]['name']
-                    logger.info(
-                        'Testing on {}: {}'.format(dataset_idx, ds_name))
+                    logger.info(f'Testing on {dataset_idx}: {ds_name}')
 
                     # create data loader
                     test_loader = create_dataloader(opt, dataset_idx=dataset_idx)
@@ -134,8 +132,7 @@ def train(opt):
                     # save/print metrics
                     if opt['test'].get('save_json'):
                         # save results to json file
-                        json_path = osp.join(
-                            opt['test']['json_dir'], '{}_avg.json'.format(ds_name))
+                        json_path = osp.join(opt['test']['json_dir'], f'{ds_name}_avg.json')
                         metric_calculator.save_results(model_idx, json_path, override=True)
                     else:
                         # print directly
@@ -146,17 +143,17 @@ def test(opt):
     # logging
     logger = base_utils.get_logger('base')
     if opt['verbose']:
-        logger.info('{} Configurations {}'.format('=' * 20, '=' * 20))
+        logger.info(f"{'=' * 20} Configurations {'=' * 20}")
         base_utils.print_options(opt, logger)
 
     # infer and evaluate performance for each model
     for load_path in opt['model']['generator']['load_path_lst']:
         # setup model index
         model_idx = osp.splitext(osp.split(load_path)[-1])[0]
-        
+
         # log
         logger.info('=' * 40)
-        logger.info('Testing model: {}'.format(model_idx))
+        logger.info(f'Testing model: {model_idx}')
         logger.info('=' * 40)
 
         # create model
@@ -170,7 +167,7 @@ def test(opt):
                 continue
 
             ds_name = opt['dataset'][dataset_idx]['name']
-            logger.info('Testing on {}: {}'.format(dataset_idx, ds_name))
+            logger.info(f'Testing on {dataset_idx}: {ds_name}')
 
             # define metric calculator
             try:
@@ -182,8 +179,7 @@ def test(opt):
             test_loader = create_dataloader(opt, dataset_idx=dataset_idx)
 
             # infer and store results for each sequence
-            for i, data in enumerate(test_loader):
-
+            for data in test_loader:
                 # fetch data
                 lr_data = data['lr'][0]
                 seq_idx = data['seq_idx'][0]
@@ -209,8 +205,7 @@ def test(opt):
             try:
                 if opt['test'].get('save_json'):
                     # save results to json file
-                    json_path = osp.join(
-                        opt['test']['json_dir'], '{}_avg.json'.format(ds_name))
+                    json_path = osp.join(opt['test']['json_dir'], f'{ds_name}_avg.json')
                     metric_calculator.save_results(model_idx, json_path, override=True)
                 else:
                     # print directly
@@ -229,7 +224,7 @@ def test(opt):
 def profile(opt, lr_size, test_speed=False):
     # logging
     logger = base_utils.get_logger('base')
-    logger.info('{} Model Information {}'.format('='*20, '='*20))
+    logger.info(f"{'=' * 20} Model Information {'=' * 20}")
     base_utils.print_options(opt['model']['generator'], logger)
 
     # basic configs
@@ -260,7 +255,7 @@ def profile(opt, lr_size, test_speed=False):
         n_test = 30
         tot_time = 0
 
-        for i in range(n_test):
+        for _ in range(n_test):
             start_time = time.time()
             with torch.no_grad():
                 _ = net_G(**dummy_input_dict)
@@ -331,7 +326,6 @@ if __name__ == '__main__':
         opt['is_train'] = True
         train(opt)
 
-    # ----------------- test ----------------- #
     elif args.mode == 'test':
         # setup paths
         base_utils.setup_paths(opt, mode='test')
@@ -340,7 +334,6 @@ if __name__ == '__main__':
         opt['is_train'] = False
         test(opt)
 
-    # ----------------- profile ----------------- #
     elif args.mode == 'profile':
         lr_size = tuple(map(int, args.lr_size.split('x')))
 
@@ -348,5 +341,4 @@ if __name__ == '__main__':
         profile(opt, lr_size, args.test_speed)
 
     else:
-        raise ValueError(
-            'Unrecognized mode: {} (train|test|profile)'.format(args.mode))
+        raise ValueError(f'Unrecognized mode: {args.mode} (train|test|profile)')

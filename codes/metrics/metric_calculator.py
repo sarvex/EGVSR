@@ -72,11 +72,10 @@ class MetricCalculator():
         metric_avg_dict = {}
 
         for metric_type in self.metric_opt.keys():
-            metric_avg_per_seq = []
-            for seq, metric_dict_per_seq in self.metric_dict.items():
-                metric_avg_per_seq.append(
-                    np.mean(metric_dict_per_seq[metric_type]))
-
+            metric_avg_per_seq = [
+                np.mean(metric_dict_per_seq[metric_type])
+                for seq, metric_dict_per_seq in self.metric_dict.items()
+            ]
             metric_avg_dict[metric_type] = np.mean(metric_avg_per_seq)
 
         return metric_avg_dict
@@ -86,9 +85,9 @@ class MetricCalculator():
 
         # per sequence results
         for seq, metric_dict_per_seq in self.metric_dict.items():
-            logger.info('Sequence: {}'.format(seq))
+            logger.info(f'Sequence: {seq}')
             for metric_type in self.metric_opt.keys():
-                mult = getattr(self, '{}_mult'.format(metric_type.lower()))
+                mult = getattr(self, f'{metric_type.lower()}_mult')
                 logger.info('\t{}: {:.6f} (x{})'.format(
                     metric_type,
                     mult*np.mean(metric_dict_per_seq[metric_type]), mult))
@@ -97,7 +96,7 @@ class MetricCalculator():
         logger.info('Average')
         metric_avg_dict = self.get_averaged_results()
         for metric_type, avg_result in metric_avg_dict.items():
-            mult = getattr(self, '{}_mult'.format(metric_type.lower()))
+            mult = getattr(self, f'{metric_type.lower()}_mult')
             logger.info('\t{}: {:.6f} (x{})'.format(
                 metric_type, mult*avg_result, mult))
 
@@ -107,11 +106,11 @@ class MetricCalculator():
             with open(save_path, 'r') as f:
                 json_dict = json.load(f)
         else:
-            json_dict = dict()
+            json_dict = {}
 
         # merge (averaged) results
         if model_idx not in json_dict:
-            json_dict[model_idx] = dict()
+            json_dict[model_idx] = {}
 
         metric_avg_dict = self.get_averaged_results()
         for metric_type, avg_result in metric_avg_dict.items():
@@ -217,11 +216,7 @@ class MetricCalculator():
         diff = true_img.astype(np.float64) - pred_img.astype(np.float64)
         RMSE = np.sqrt(np.mean(np.power(diff, 2)))
 
-        if RMSE == 0:
-            return np.inf
-
-        PSNR = 20 * np.log10(255.0 / RMSE)
-        return PSNR
+        return np.inf if RMSE == 0 else 20 * np.log10(255.0 / RMSE)
 
     def compute_LPIPS(self):
         true_img = np.ascontiguousarray(self.true_img_cur)
@@ -254,7 +249,5 @@ class MetricCalculator():
 
         # EPE
         diff_OF = true_OF - pred_OF
-        tOF = np.mean(np.sqrt(np.sum(diff_OF**2, axis=-1)))
-
-        return tOF
+        return np.mean(np.sqrt(np.sum(diff_OF**2, axis=-1)))
 

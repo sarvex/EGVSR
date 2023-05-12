@@ -18,10 +18,7 @@ imgs.sort()
 def create_gif(image_list, gif_name):
     print(image_list)
 
-    frames = []
-    for image_name in image_list:
-        frames.append(imageio.imread(image_name))
-        # Save them as frames into a gif
+    frames = [imageio.imread(image_name) for image_name in image_list]
     imageio.mimsave(gif_name, frames, 'GIF', duration=TIME_GAP)
     return
 

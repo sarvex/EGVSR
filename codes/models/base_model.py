@@ -77,7 +77,7 @@ class BaseModel():
         pass
 
     def save_network(self, net, net_label, current_iter):
-        save_filename = '{}_iter{}.pth'.format(net_label, current_iter)
+        save_filename = f'{net_label}_iter{current_iter}.pth'
         save_path = osp.join(self.ckpt_dir, save_filename)
         torch.save(net.state_dict(), save_path)
 
@@ -111,7 +111,6 @@ class BaseModel():
                 dim=0)
 
         else:
-            raise ValueError('Unrecognized padding mode: {}'.format(
-                padding_mode))
+            raise ValueError(f'Unrecognized padding mode: {padding_mode}')
 
         return lr_data, n_pad_front

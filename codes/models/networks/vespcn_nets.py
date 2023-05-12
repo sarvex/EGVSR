@@ -109,11 +109,7 @@ class VESPNet(BaseSequenceGenerator):
         c, lr_h, lr_w = lr_size
 
         lr_seq = torch.rand(n, c, lr_h, lr_w, dtype=torch.float32)
-        data_dict = {
-            'lr_seq': lr_seq
-        }
-
-        return data_dict
+        return {'lr_seq': lr_seq}
 
     def infer_sequence(self, lr_data, device):
         """

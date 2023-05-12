@@ -42,9 +42,7 @@ def space_to_depth(x, scale=4):
 
     x_reshaped = x.reshape(n, c, out_h, scale, out_w, scale)
     x_reshaped = x_reshaped.permute(0, 3, 5, 1, 2, 4)
-    output = x_reshaped.reshape(n, scale * scale * c, out_h, out_w)
-
-    return output
+    return x_reshaped.reshape(n, scale * scale * c, out_h, out_w)
 
 
 def backward_warp(x, flow, mode='bilinear', padding_mode='border'):
@@ -71,16 +69,13 @@ def backward_warp(x, flow, mode='bilinear', padding_mode='border'):
     # add flow to grid and reshape to nhw2
     grid = (grid + flow).permute(0, 2, 3, 1)
 
-    # bilinear sampling
-    # Note: `align_corners` is set to `True` by default in PyTorch version
-    #        lower than 1.4.0
-    if int(''.join(torch.__version__.split('.')[:2])) >= 14:
-        output = F.grid_sample(
-            x, grid, mode=mode, padding_mode=padding_mode, align_corners=True)
-    else:
-        output = F.grid_sample(x, grid, mode=mode, padding_mode=padding_mode)
-
-    return output
+    return (
+        F.grid_sample(
+            x, grid, mode=mode, padding_mode=padding_mode, align_corners=True
+        )
+        if int(''.join(torch.__version__.split('.')[:2])) >= 14
+        else F.grid_sample(x, grid, mode=mode, padding_mode=padding_mode)
+    )
 
 
 def get_upsampling_func(scale=4, degradation='BI'):
@@ -93,7 +88,7 @@ def get_upsampling_func(scale=4, degradation='BI'):
         upsample_func = BicubicUpsample(scale_factor=scale)
 
     else:
-        raise ValueError('Unrecognized degradation: {}'.format(degradation))
+        raise ValueError(f'Unrecognized degradation: {degradation}')
 
     return upsample_func
 

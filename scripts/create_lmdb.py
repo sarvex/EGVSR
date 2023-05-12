@@ -11,9 +11,11 @@ import numpy as np
 
 
 def create_lmdb(dataset, raw_dir, lmdb_dir, filter_file=''):
-    assert dataset in ('VimeoTecoGAN', 'VimeoTecoGAN-sub'), \
-        'Unknown Dataset: {}'.format(dataset)
-    print('Creating lmdb dataset: {}'.format(dataset))
+    assert dataset in (
+        'VimeoTecoGAN',
+        'VimeoTecoGAN-sub',
+    ), f'Unknown Dataset: {dataset}'
+    print(f'Creating lmdb dataset: {dataset}')
 
     # retrieve sequences
     if filter_file:  # dump selective data into lmdb
@@ -21,7 +23,7 @@ def create_lmdb(dataset, raw_dir, lmdb_dir, filter_file=''):
             seq_dir_lst = sorted([line.strip() for line in f])
     else:
         seq_dir_lst = sorted(os.listdir(raw_dir))
-    print('Number of sequences: {}'.format(len(seq_dir_lst)))
+    print(f'Number of sequences: {len(seq_dir_lst)}')
 
     # compute space to allocate
     print('Calculating space needed for LMDB generation ... ', end='')
@@ -42,8 +44,7 @@ def create_lmdb(dataset, raw_dir, lmdb_dir, filter_file=''):
     txn = env.begin(write=True)
     for b, seq_dir in enumerate(seq_dir_lst):
         # log
-        print('Processing {} ({}/{})\r'.format(
-            seq_dir, b, len(seq_dir_lst)), end='')
+        print(f'Processing {seq_dir} ({b}/{len(seq_dir_lst)})\r', end='')
 
         # setup
         frm_path_lst = sorted(glob.glob(osp.join(raw_dir, seq_dir, '*.png')))
@@ -130,18 +131,17 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # setup
-    raw_dir = 'data/{}/{}'.format(args.dataset, args.data_type)
-    lmdb_dir = 'data/{}/{}.lmdb'.format(args.dataset, args.data_type)
+    raw_dir = f'data/{args.dataset}/{args.data_type}'
+    lmdb_dir = f'data/{args.dataset}/{args.data_type}.lmdb'
     filter_file = ''
 
     # run
     if osp.exists(lmdb_dir):
-        print('Dataset [{}] already exists'.format(args.dataset))
-        print('Checking the LMDB dataset ...')
-        check_lmdb(args.dataset, lmdb_dir)
+        print(f'Dataset [{args.dataset}] already exists')
     else:
         create_lmdb(args.dataset, raw_dir, lmdb_dir, filter_file)
 
-        print('Checking the LMDB dataset ...')
-        check_lmdb(args.dataset, lmdb_dir)
+
+    print('Checking the LMDB dataset ...')
+    check_lmdb(args.dataset, lmdb_dir)
 

@@ -35,10 +35,10 @@ def get_logger(name):
 def print_options(opt, logger, tab=''):
     for key, val in opt.items():
         if isinstance(val, dict):
-            logger.info('{}{}:'.format(tab, key))
-            print_options(val, logger, tab + '  ')
+            logger.info(f'{tab}{key}:')
+            print_options(val, logger, f'{tab}  ')
         else:
-            logger.info('{}{}: {}'.format(tab, key, val))
+            logger.info(f'{tab}{key}: {val}')
 
 
 def retrieve_files(dir, suffix='png|jpg'):
@@ -52,7 +52,7 @@ def retrieve_files(dir, suffix='png|jpg'):
             if osp.isdir(dd):
                 retrieve_files_recursively(dd, file_lst)
             else:
-                if osp.splitext(d)[-1].lower() in ['.' + s for s in suffix]:
+                if osp.splitext(d)[-1].lower() in [f'.{s}' for s in suffix]:
                     file_lst.append(dd)
 
     if not dir:

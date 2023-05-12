@@ -39,8 +39,7 @@ def optical_flow_warp(image, image_optical_flow):
     grid = grid + torch.cat((flow_0, flow_1), 1)
     grid = grid.transpose(1, 2)
     grid = grid.transpose(3, 2)
-    output = F.grid_sample(image, grid, padding_mode='border')
-    return output
+    return F.grid_sample(image, grid, padding_mode='border')
 
 
 class make_dense(nn.Module):
@@ -61,7 +60,7 @@ class RDB(nn.Module):
         super(RDB, self).__init__()
         modules = []
         channels_buffer = channels
-        for i in range(nDenselayer):
+        for _ in range(nDenselayer):
             modules.append(make_dense(channels_buffer, growth))
             channels_buffer += growth
         self.dense_layers = nn.Sequential(*modules)
@@ -203,19 +202,14 @@ class SOFNet(BaseSequenceGenerator):
                                              flow_21_L3[:, :, i::self.upscale_factor,
                                              j::self.upscale_factor] / self.upscale_factor)
                 draft_cube = torch.cat((draft_cube, draft_01, draft_21), 1)
-        output = self.SRnet(draft_cube)
-        return output
+        return self.SRnet(draft_cube)
 
     def generate_dummy_input(self, lr_size):
         n = 3
         c, lr_h, lr_w = lr_size
 
         lr_seq = torch.rand(1, 3, lr_h, lr_w, dtype=torch.float32)
-        data_dict = {
-            'lr_seq': lr_seq
-        }
-
-        return data_dict
+        return {'lr_seq': lr_seq}
 
     def infer_sequence(self, lr_data, device):
         """
